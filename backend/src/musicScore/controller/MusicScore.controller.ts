@@ -1,13 +1,15 @@
 import { Controller, Get } from '@nestjs/common';
-import { MusicScoreFnlService } from '../service/music-score-fnl.service';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { MusicScoreFnl } from '../entity/MusicScoreFnl.entity';
+import {MusicScoreService} from "../service/MusicScore.service";
 
+@ApiTags('Music Score')
 @Controller('music-score-fnl')
 export class MusicScoreController {
-  constructor(private readonly musicScoreFnlService: MusicScoreFnlService) {}
+  constructor(private readonly musicScoreService: MusicScoreService) {}
 
   @Get()
   async findAll(): Promise<MusicScoreFnl[]> {
-    return this.musicScoreFnlService.findAll();
+    return this.musicScoreService.findAll();
   }
 }

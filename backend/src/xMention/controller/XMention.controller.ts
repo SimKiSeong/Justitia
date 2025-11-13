@@ -1,9 +1,11 @@
 import { Controller, Get } from '@nestjs/common';
-import { XMentionService } from '../service/xMention.service';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { XMentionService } from '../service/XMention.service';
 import { XMentionScore } from '../entity/XMentionScore.entity';
 import { XMentionDaily } from '../entity/XMentionDaily.entity';
 import { XMentionRaw } from '../entity/XMentionRaw.entity';
 
+@ApiTags('X (Twitter) Mention')
 @Controller('x-mention')
 export class XMentionController {
   constructor(private readonly xMentionService: XMentionService) {}

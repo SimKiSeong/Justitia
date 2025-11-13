@@ -1,9 +1,11 @@
 import { Controller, Get } from '@nestjs/common';
-import { YoutubeService } from '../service/youtube.service';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { YoutubeService } from '../service/Youtube.service';
 import { YoutubeVideo } from '../entity/YoutubeVideo.entity';
 import { YoutubeComments } from '../entity/YoutubeComments.entity';
 import { YoutubeCommentsScore } from '../entity/YoutubeCommentsScore.entity';
 
+@ApiTags('YouTube')
 @Controller('youtube')
 export class YoutubeController {
   constructor(private readonly youtubeService: YoutubeService) {}

@@ -7,6 +7,6 @@ export class MusicScoreService {
   constructor(private readonly dataSource: DataSource) {}
 
   async findAll(): Promise<MusicScoreFnl[]> {
-    return this.dataSource.manager.find(MusicScoreFnl);
+    return this.dataSource.manager.find(MusicScoreFnl,{take:1000});
   }
 }

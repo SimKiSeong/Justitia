@@ -1,6 +1,6 @@
 import { Column, Entity, OneToMany } from "typeorm";
-import { YoutubeComments } from "./YoutubeComments";
-import { YoutubeCommentsScore } from "./YoutubeCommentsScore";
+import { YoutubeComments } from "./YoutubeComments.entity";
+import { YoutubeCommentsScore } from "./YoutubeCommentsScore.entity";
 
 @Entity("YOUTUBE_VIDEO", { schema: "justitia" })
 export class YoutubeVideo {

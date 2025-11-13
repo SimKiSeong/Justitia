@@ -1,5 +1,5 @@
 import { Column, Entity, Index, JoinColumn, ManyToOne } from "typeorm";
-import { YoutubeVideo } from "./YoutubeVideo";
+import { YoutubeVideo } from "./YoutubeVideo.entity";
 
 @Index("FK_YoutubeComments_Video_Score", ["videoId"], {})
 @Entity("YOUTUBE_COMMENTS_SCORE", { schema: "justitia" })
