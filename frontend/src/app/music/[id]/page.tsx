@@ -4,18 +4,64 @@ import { use, useState, useEffect } from 'react';
 import Image from 'next/image';
 import RatingCard from '@/components/music/RatingCard';
 import OverallScore from '@/components/music/OverallScore';
+import SentimentChart from '@/components/music/SentimentChart';
+import SentimentSummary from '@/components/music/SentimentSummary';
+import TrendChart from '@/components/music/TrendChart';
+import CommentList from '@/components/music/CommentList';
 import { mockMusicData } from '../mockData';
 import { MusicAnalysis } from '../types';
+import { youtubeAPI, sentimentUtils } from '@/lib/api';
+import { YoutubeCommentScore, CommentWithSentiment, SentimentAnalysis, SentimentTrend } from '@/types/api';
 
 export default function MusicAnalysisPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const [musicData, setMusicData] = useState<MusicAnalysis | null>(null);
-  const [activeTab, setActiveTab] = useState<'ratings' | 'stats'>('ratings');
+  const [activeTab, setActiveTab] = useState<'ratings' | 'stats' | 'sentiment'>('ratings');
+  
+  // 실제 API 데이터 상태
+  const [comments, setComments] = useState<CommentWithSentiment[]>([]);
+  const [sentimentAnalysis, setSentimentAnalysis] = useState<SentimentAnalysis>({ positive: 0, neutral: 0, negative: 0, total: 0 });
+  const [trendData, setTrendData] = useState<SentimentTrend[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const data = mockMusicData[resolvedParams.id] || mockMusicData['1'];
     setMusicData(data);
   }, [resolvedParams.id]);
+
+  // API 데이터 로드
+  useEffect(() => {
+    async function loadSentimentData() {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // YouTube 댓글 데이터 가져오기
+        const commentsData = await youtubeAPI.getCommentsWithScore();
+        
+        // 감성 라벨 추가
+        const commentsWithLabels = sentimentUtils.addSentimentLabels(commentsData);
+        setComments(commentsWithLabels);
+        
+        // 감성 분석 집계
+        const analysis = sentimentUtils.analyzeSentiment(commentsData);
+        setSentimentAnalysis(analysis);
+        
+        // 트렌드 데이터 생성 (일별)
+        const trend = sentimentUtils.generateDailyTrend(commentsData);
+        setTrendData(trend);
+        
+      } catch (err) {
+        console.error('감성 데이터 로드 실패:', err);
+        setError(err instanceof Error ? err.message : '데이터를 불러오는데 실패했습니다.');
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    loadSentimentData();
+  }, []);
 
   if (!musicData) {
     return (
@@ -138,6 +184,16 @@ export default function MusicAnalysisPage({ params }: { params: Promise<{ id: st
             >
               통계 분석
             </button>
+            <button
+              onClick={() => setActiveTab('sentiment')}
+              className={`flex-1 py-4 px-6 font-medium transition-colors ${
+                activeTab === 'sentiment'
+                  ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              }`}
+            >
+              감성 분석
+            </button>
           </div>
         </div>
 
@@ -174,6 +230,69 @@ export default function MusicAnalysisPage({ params }: { params: Promise<{ id: st
                     </div>
                   </div>
                 </div>
+              </div>
+            )}
+
+            {activeTab === 'sentiment' && (
+              <div className="space-y-6">
+                {loading ? (
+                  <div className="bg-white rounded-xl shadow-md p-12 text-center">
+                    <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+                    <p className="text-gray-600">감성 분석 데이터 로딩 중...</p>
+                  </div>
+                ) : error ? (
+                  <div className="bg-red-50 border border-red-200 rounded-xl p-8 text-center">
+                    <svg className="w-12 h-12 text-red-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p className="text-red-700 font-semibold mb-2">데이터 로드 실패</p>
+                    <p className="text-red-600 text-sm">{error}</p>
+                  </div>
+                ) : (
+                  <>
+                    {/* 감성 요약 카드 */}
+                    <div className="bg-white rounded-xl shadow-md p-6">
+                      <h3 className="text-2xl font-bold text-gray-800 mb-6">감성 요약</h3>
+                      <SentimentSummary
+                        positive={sentimentAnalysis.positive}
+                        neutral={sentimentAnalysis.neutral}
+                        negative={sentimentAnalysis.negative}
+                        total={sentimentAnalysis.total}
+                      />
+                    </div>
+
+                    {/* 감성 차트와 트렌드 */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      <div className="bg-white rounded-xl shadow-md p-6">
+                        <SentimentChart
+                          positive={sentimentAnalysis.positive}
+                          neutral={sentimentAnalysis.neutral}
+                          negative={sentimentAnalysis.negative}
+                        />
+                      </div>
+                      
+                      <div className="bg-white rounded-xl shadow-md p-6">
+                        <h3 className="text-xl font-bold text-gray-800 mb-12 text-center">
+                          날짜별 감성 트렌드
+                        
+                        </h3>
+                        {trendData.length > 0 ? (
+                          <TrendChart data={trendData} />
+                        ) : (
+                          <div className="text-center text-gray-500 py-12">
+                            트렌드 데이터가 없습니다.
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* 댓글 목록 */}
+                    <div className="bg-white rounded-xl shadow-md p-6">
+                      <h3 className="text-2xl font-bold text-gray-800 mb-6">댓글 목록</h3>
+                      <CommentList comments={comments} />
+                    </div>
+                  </>
+                )}
               </div>
             )}
           </div>

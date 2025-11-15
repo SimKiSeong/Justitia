@@ -1,60 +1,43 @@
-import SentimentSummary from "@/components/music/SentimentSummary";
-import SentimentChart from '@/components/music/SentimentChart';
-import TrendChart from '../components/music/TrendChart';
-
-const mockData = [
-  { time: '00:00', positive: 50, neutral: 25, negative: 15 },
-  { time: '03:00', positive: 40, neutral: 60, negative: 20 },
-  { time: '06:00', positive: 60, neutral: 35, negative: 25 },
-  { time: '09:00', positive: 60, neutral: 40, negative: 25 },
-  { time: '12:00', positive: 70, neutral: 45, negative: 25 },
-  { time: '15:00', positive: 65, neutral: 50, negative: 40 },
-  { time: '18:00', positive: 65, neutral: 40, negative: 45 },
-  { time: '21:00', positive: 75, neutral: 60, negative: 45 },
-];
-
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+      <div className="max-w-7xl mx-auto px-4 py-16">
         {/* 헤더 */}
-        <div className="mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            🎵 감성 분석 테스트
+        <div className="text-center mb-12">
+          <h1 className="text-5xl font-bold text-gray-900 mb-4">
+            차트를 차트답게 <span className="text-blue-600">Justitia</span>
           </h1>
-          <p className="text-gray-600">
+          <p className="text-xl text-gray-600">
+            음악 차트의 공정성을 위한 감성 분석 플랫폼
           </p>
-        </div>
-     
-        {/* 감성 분석 섹션 */}
-        <div className="bg-white rounded-2xl shadow-xl p-8 border-t-4 border-blue-500">
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">
-            📊 감성 분석 요약
-          </h2>
-          <p className="text-gray-600 mb-6">
-          </p>
-          
-          <div className="grid grid-cols-2 gap-8 mb-8">
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <SentimentChart
-                positive={1245}
-                neutral={342}
-                negative={89}
-              />
-            </div>
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <TrendChart data={mockData} />
-            </div>
-          </div>
-          <SentimentSummary
-            positive={1245}
-            neutral={342}
-            negative={89}
-            total={1676}
-          />
         </div>
 
-       
+        {/* 메인 컨텐츠 */}
+        <div className="grid md:grid-cols-3 gap-8 mt-16">
+          <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow">
+            <div className="text-4xl mb-4">📊</div>
+            <h3 className="text-xl font-bold text-gray-900 mb-3">실시간 차트</h3>
+            <p className="text-gray-600">
+              최신 음악 차트와 감성 분석 데이터를 실시간으로 확인하세요
+            </p>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow">
+            <div className="text-4xl mb-4">🎤</div>
+            <h3 className="text-xl font-bold text-gray-900 mb-3">아티스트 분석</h3>
+            <p className="text-gray-600">
+              아티스트별 팬 반응과 감성 트렌드를 분석합니다
+            </p>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow">
+            <div className="text-4xl mb-4">💬</div>
+            <h3 className="text-xl font-bold text-gray-900 mb-3">댓글 분석</h3>
+            <p className="text-gray-600">
+              YouTube, X 등 소셜 미디어 댓글 감성을 분석합니다
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
