@@ -10,7 +10,8 @@ import {
   MusicScoreFnl,
   XMentionScore,
   DailyFinalScoreResponse,
-  AggregatedScore
+  AggregatedScore,
+  AISentimentAnalysis,
 } from '@/types/api';
 
 // 환경변수에서 API URL 가져오기, 없으면 배포된 서버 주소 사용
@@ -103,6 +104,14 @@ export const dailyFinalScoreAPI = {
     
     const query = queryParams.toString();
     return fetchAPI<AggregatedScore>(`/daily-final-score/aggregated${query ? `?${query}` : ''}`);
+  },
+};
+
+// Sentiment AI API (신규 추가)
+export const sentimentAPI = {
+  // 특정 비디오의 AI 감성 분석 결과 조회
+  analyzeVideo: (videoId: string): Promise<AISentimentAnalysis> => {
+    return fetchAPI<AISentimentAnalysis>(`/sentiment/analyze/${videoId}`);
   },
 };
 

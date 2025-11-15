@@ -54,6 +54,31 @@ export interface CommentWithSentiment extends YoutubeCommentScore {
   sentimentLabel: SentimentLabel;
 }
 
+// AI 감성 분석 결과 타입
+export interface AISentimentAnalysis {
+  summary: string; // AI 생성 요약
+  sentiment: {
+    positive: number;
+    neutral: number;
+    negative: number;
+    total: number;
+  };
+  keywords: string[]; // 주요 키워드
+  trends: SentimentTrend[];
+  comments: AICommentWithSentiment[];
+}
+
+export interface AICommentWithSentiment {
+  commentId: string;
+  text: string;
+  score: number; // 기존 DB 점수
+  sentimentLabel: 'positive' | 'neutral' | 'negative'; // AI 분석 라벨
+  sentimentScore: number; // AI 감성 점수 (0-1)
+  publishedAt: Date;
+  likeCount: number;
+  authorDisplayName: string;
+}
+
 // Music Score 관련 타입
 export interface MusicScoreFnl {
   musicId: string;

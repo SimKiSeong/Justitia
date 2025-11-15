@@ -8,10 +8,12 @@ import SentimentChart from '@/components/music/SentimentChart';
 import SentimentSummary from '@/components/music/SentimentSummary';
 import TrendChart from '@/components/music/TrendChart';
 import CommentList from '@/components/music/CommentList';
+import KeywordCloud from '@/components/music/KeywordCloud';
+import AISummaryCard from '@/components/music/AISummaryCard';
 import { mockMusicData } from '../mockData';
 import { MusicAnalysis } from '../types';
-import { youtubeAPI, sentimentUtils } from '@/lib/api';
-import { YoutubeCommentScore, CommentWithSentiment, SentimentAnalysis, SentimentTrend } from '@/types/api';
+import { youtubeAPI, sentimentUtils, sentimentAPI } from '@/lib/api';
+import { YoutubeCommentScore, CommentWithSentiment, SentimentAnalysis, SentimentTrend, AISentimentAnalysis } from '@/types/api';
 
 export default function MusicAnalysisPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -22,6 +24,12 @@ export default function MusicAnalysisPage({ params }: { params: Promise<{ id: st
   const [comments, setComments] = useState<CommentWithSentiment[]>([]);
   const [sentimentAnalysis, setSentimentAnalysis] = useState<SentimentAnalysis>({ positive: 0, neutral: 0, negative: 0, total: 0 });
   const [trendData, setTrendData] = useState<SentimentTrend[]>([]);
+  
+  // AI 분석 데이터 상태
+  const [aiAnalysis, setAiAnalysis] = useState<AISentimentAnalysis | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
+  
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -61,6 +69,44 @@ export default function MusicAnalysisPage({ params }: { params: Promise<{ id: st
     }
     
     loadSentimentData();
+  }, []);
+
+  // AI 분석 데이터 로드 (별도 호출 - 느릴 수 있음)
+  useEffect(() => {
+    async function loadAIAnalysis() {
+      try {
+        setAiLoading(true);
+        setAiError(null);
+        
+        console.log('🔍 AI 분석 시작...');
+        
+        // 먼저 비디오 목록 가져오기
+        const videos = await youtubeAPI.getVideos();
+        console.log('📹 비디오 목록:', videos);
+        
+        if (videos.length === 0) {
+          setAiError('비디오 데이터가 없습니다.');
+          return;
+        }
+        
+        // 첫 번째 비디오의 ID 사용
+        const videoId = videos[0].videoId;
+        console.log('🎯 선택된 videoId:', videoId);
+        
+        const analysis = await sentimentAPI.analyzeVideo(videoId);
+        console.log('✅ AI 분석 완료:', analysis);
+        
+        setAiAnalysis(analysis);
+        
+      } catch (err) {
+        console.error('❌ AI 분석 실패:', err);
+        setAiError(err instanceof Error ? err.message : 'AI 분석 중 오류가 발생했습니다.');
+      } finally {
+        setAiLoading(false);
+      }
+    }
+    
+    loadAIAnalysis();
   }, []);
 
   if (!musicData) {
@@ -250,14 +296,25 @@ export default function MusicAnalysisPage({ params }: { params: Promise<{ id: st
                   </div>
                 ) : (
                   <>
+                    {/* AI 요약 카드 */}
+                    {aiLoading ? (
+                      <AISummaryCard summary="" isLoading={true} />
+                    ) : aiError ? (
+                      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-sm text-yellow-700">
+                        AI 요약 생성 실패: {aiError}
+                      </div>
+                    ) : aiAnalysis ? (
+                      <AISummaryCard summary={aiAnalysis.summary} />
+                    ) : null}
+
                     {/* 감성 요약 카드 */}
                     <div className="bg-white rounded-xl shadow-md p-6">
                       <h3 className="text-2xl font-bold text-gray-800 mb-6">감성 요약</h3>
                       <SentimentSummary
-                        positive={sentimentAnalysis.positive}
-                        neutral={sentimentAnalysis.neutral}
-                        negative={sentimentAnalysis.negative}
-                        total={sentimentAnalysis.total}
+                        positive={aiAnalysis ? aiAnalysis.sentiment.positive : sentimentAnalysis.positive}
+                        neutral={aiAnalysis ? aiAnalysis.sentiment.neutral : sentimentAnalysis.neutral}
+                        negative={aiAnalysis ? aiAnalysis.sentiment.negative : sentimentAnalysis.negative}
+                        total={aiAnalysis ? aiAnalysis.sentiment.total : sentimentAnalysis.total}
                       />
                     </div>
 
@@ -265,9 +322,9 @@ export default function MusicAnalysisPage({ params }: { params: Promise<{ id: st
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                       <div className="bg-white rounded-xl shadow-md p-6">
                         <SentimentChart
-                          positive={sentimentAnalysis.positive}
-                          neutral={sentimentAnalysis.neutral}
-                          negative={sentimentAnalysis.negative}
+                          positive={aiAnalysis ? aiAnalysis.sentiment.positive : sentimentAnalysis.positive}
+                          neutral={aiAnalysis ? aiAnalysis.sentiment.neutral : sentimentAnalysis.neutral}
+                          negative={aiAnalysis ? aiAnalysis.sentiment.negative : sentimentAnalysis.negative}
                         />
                       </div>
                       
@@ -289,7 +346,14 @@ export default function MusicAnalysisPage({ params }: { params: Promise<{ id: st
                     {/* 댓글 목록 */}
                     <div className="bg-white rounded-xl shadow-md p-6">
                       <h3 className="text-2xl font-bold text-gray-800 mb-6">댓글 목록</h3>
-                      <CommentList comments={comments} />
+                      <CommentList comments={aiAnalysis ? aiAnalysis.comments.map(c => ({
+                        ...c,
+                        videoId: 'temp',
+                        parentId: null,
+                        updatedAt: c.publishedAt,
+                        collectedAtLocal: c.publishedAt,
+                        relevance: null,
+                      })) : comments} />
                     </div>
                   </>
                 )}

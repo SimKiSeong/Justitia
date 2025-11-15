@@ -7,6 +7,7 @@ import { XMentionModule } from './xMention/XMention.module';
 import { YoutubeModule } from './youtube/Youtube.module';
 import {MusicScoreModule} from "./musicScore/MusicScore.module";
 import {DailyFinalScoreModule} from "./dailyFinalScore/DailyFinalScore.module";
+import { SentimentModule } from './sentiment/Sentiment.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import {DailyFinalScoreModule} from "./dailyFinalScore/DailyFinalScore.module";
     YoutubeModule,
     MusicScoreModule,
     DailyFinalScoreModule,
+    SentimentModule,
   ],
   controllers: [AppController],
   providers: [AppService],
