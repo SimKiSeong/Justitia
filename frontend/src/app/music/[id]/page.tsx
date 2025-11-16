@@ -10,10 +10,11 @@ import TrendChart from '@/components/music/TrendChart';
 import CommentList from '@/components/music/CommentList';
 import KeywordCloud from '@/components/music/KeywordCloud';
 import AISummaryCard from '@/components/music/AISummaryCard';
+import DailySummaryCard from '@/components/music/DailySummaryCard';
 import { mockMusicData } from '../mockData';
 import { MusicAnalysis } from '../types';
-import { youtubeAPI, sentimentUtils, sentimentAPI } from '@/lib/api';
-import { YoutubeCommentScore, CommentWithSentiment, SentimentAnalysis, SentimentTrend, AISentimentAnalysis } from '@/types/api';
+import { youtubeAPI, sentimentUtils, sentimentAPI, dailySummaryAPI } from '@/lib/api';
+import { YoutubeCommentScore, CommentWithSentiment, SentimentAnalysis, SentimentTrend, AISentimentAnalysis, DailySummaryResponse } from '@/types/api';
 
 export default function MusicAnalysisPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -29,6 +30,10 @@ export default function MusicAnalysisPage({ params }: { params: Promise<{ id: st
   const [aiAnalysis, setAiAnalysis] = useState<AISentimentAnalysis | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
+  
+  // Daily Summary 데이터 상태
+  const [dailySummaries, setDailySummaries] = useState<DailySummaryResponse[]>([]);
+  const [summaryLoading, setSummaryLoading] = useState(false);
   
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -107,6 +112,30 @@ export default function MusicAnalysisPage({ params }: { params: Promise<{ id: st
     }
     
     loadAIAnalysis();
+  }, []);
+
+  // Daily Summary 데이터 로드
+  useEffect(() => {
+    async function loadDailySummary() {
+      try {
+        setSummaryLoading(true);
+        
+        // 11월 1일까지 데이터 가져오기 (트위터 데이터 있는 기간)
+        const summaries = await dailySummaryAPI.get({
+          endDate: '2025-11-01',
+        });
+        
+        console.log('📝 Daily Summary 로드 성공:', summaries);
+        setDailySummaries(summaries);
+        
+      } catch (err) {
+        console.error('❌ Daily Summary 로드 실패:', err);
+      } finally {
+        setSummaryLoading(false);
+      }
+    }
+    
+    loadDailySummary();
   }, []);
 
   if (!musicData) {
@@ -296,20 +325,26 @@ export default function MusicAnalysisPage({ params }: { params: Promise<{ id: st
                   </div>
                 ) : (
                   <>
-                    {/* AI 요약 카드 */}
-                    {aiLoading ? (
-                      <AISummaryCard summary="" isLoading={true} />
-                    ) : aiError ? (
-                      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-sm text-yellow-700">
-                        AI 요약 생성 실패: {aiError}
-                      </div>
-                    ) : aiAnalysis ? (
-                      <AISummaryCard summary={aiAnalysis.summary} />
-                    ) : null}
+                    {/* Daily Summary 카드 (최상단) */}
+                    <DailySummaryCard summaries={dailySummaries} isLoading={summaryLoading} />
 
                     {/* 감성 요약 카드 */}
                     <div className="bg-white rounded-xl shadow-md p-6">
                       <h3 className="text-2xl font-bold text-gray-800 mb-6">감성 요약</h3>
+                      
+                      {/* AI 댓글 분석 요약 */}
+                      <div className="mb-6">
+                        {aiLoading ? (
+                          <AISummaryCard summary="" isLoading={true} />
+                        ) : aiError ? (
+                          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-sm text-yellow-700">
+                            AI 요약 생성 실패: {aiError}
+                          </div>
+                        ) : aiAnalysis ? (
+                          <AISummaryCard summary={aiAnalysis.summary} />
+                        ) : null}
+                      </div>
+                      
                       <SentimentSummary
                         positive={aiAnalysis ? aiAnalysis.sentiment.positive : sentimentAnalysis.positive}
                         neutral={aiAnalysis ? aiAnalysis.sentiment.neutral : sentimentAnalysis.neutral}

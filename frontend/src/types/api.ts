@@ -109,3 +109,15 @@ export interface AggregatedScore {
   count: number;
   // 필요한 다른 필드들 추가
 }
+
+// Daily Summary 관련 타입
+export interface DailySummaryResponse {
+  id: number;
+  summaryDate: string;
+  platform: 'twitter' | 'youtube' | 'combined';
+  summaryText: string | null;
+  sentiment: 'positive' | 'negative' | 'neutral' | null;
+  keywords: string | null;
+  reviewCount: number | null;
+  createdAt: Date | null;
+}

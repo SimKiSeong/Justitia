@@ -12,6 +12,7 @@ import {
   DailyFinalScoreResponse,
   AggregatedScore,
   AISentimentAnalysis,
+  DailySummaryResponse,
 } from '@/types/api';
 
 // 환경변수에서 API URL 가져오기, 없으면 배포된 서버 주소 사용
@@ -115,6 +116,19 @@ export const sentimentAPI = {
   },
 };
 
+// Daily Summary API
+export const dailySummaryAPI = {
+  get: (params?: { startDate?: string; endDate?: string; platform?: string }): Promise<DailySummaryResponse[]> => {
+    const queryParams = new URLSearchParams();
+    if (params?.startDate) queryParams.append('startDate', params.startDate);
+    if (params?.endDate) queryParams.append('endDate', params.endDate);
+    if (params?.platform) queryParams.append('platform', params.platform);
+    
+    const query = queryParams.toString();
+    return fetchAPI<DailySummaryResponse[]>(`/daily-summary${query ? `?${query}` : ''}`);
+  },
+};
+
 // 감성 분석 유틸리티 함수들
 export const sentimentUtils = {
   // 댓글 배열에서 감성 집계 (score: 1~5 점수를 긍정/중립/부정으로 분류)
@@ -181,8 +195,8 @@ export const sentimentUtils = {
       }))
       .sort((a, b) => a.time.localeCompare(b.time));
     
-    // 처음 7일만 반환
-    return allTrends.slice(0, 7);
+    // 모든 일별 트렌드 반환 (11/1부터 현재까지)
+    return allTrends;
   },
 
   // 시간대별 감성 트렌드 (시간별)

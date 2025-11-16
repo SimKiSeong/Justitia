@@ -43,7 +43,7 @@ export default function AISummaryCard({ summary, isLoading }: AISummaryCardProps
         </div>
         <div className="flex-1">
           <h3 className="text-lg font-bold text-gray-900 mb-2 flex items-center gap-2">
-            댓글 분석 요약
+            핵심 요약
             <span className="text-xs font-normal text-purple-600 bg-purple-100 px-2 py-1 rounded-full">
               자동 생성
             </span>

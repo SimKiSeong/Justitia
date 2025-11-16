@@ -162,9 +162,12 @@ export class SimpleSentimentService {
     } else if (negPercent > 30) {
       sentiment = '다소 부정적';
       detail = '일부 부정적인 의견이 있습니다.';
+    } else if (neuPercent > 60) {
+      sentiment = '중립적';
+      detail = '긍정이 부정보다 많습니다.';
     } else {
       sentiment = '중립적';
-      detail = '긍정과 부정이 고르게 분포되어 있습니다.';
+      detail = '다양한 의견이 혼재되어 있습니다.';
     }
     
     return `총 ${total.toLocaleString()}개의 댓글을 분석한 결과, ${posPercent}%가 긍정, ${neuPercent}%가 중립, ${negPercent}%가 부정적 반응을 보였습니다. 전반적으로 ${sentiment}인 분위기이며, ${detail}`;
