@@ -7,7 +7,11 @@ async function bootstrap() {
 
   // CORS 설정 추가
   app.enableCors({
-    origin: ['http://localhost:3000', 'http://localhost:3001'],
+    origin: [
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'https://justitia-nu.vercel.app'
+    ],
     credentials: true,
   });
 
