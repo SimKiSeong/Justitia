@@ -10,6 +10,7 @@ async function bootstrap() {
     origin: [
       'http://localhost:3000',
       'http://localhost:3001',
+      'http://34.59.147.161:3000',
       'https://justitia-nu.vercel.app'
     ],
     credentials: true,
