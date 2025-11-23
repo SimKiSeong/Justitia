@@ -240,47 +240,47 @@ export default function MusicAnalysisPage({ params }: { params: Promise<{ id: st
         <div className="bg-white rounded-xl shadow-md mb-6">
           <div className="flex border-b">
             <button
-              onClick={() => setActiveTab('ratings')}
-              className={`flex-1 py-4 px-6 font-medium transition-colors ${
-                activeTab === 'ratings'
-                  ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-              }`}
+                onClick={() => setActiveTab('sentiment')}
+                className={`flex-1 py-4 px-6 font-medium transition-colors ${
+                    activeTab === 'sentiment'
+                        ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+            >
+              감성 분석
+            </button>
+            <button
+                onClick={() => setActiveTab('ratings')}
+                className={`flex-1 py-4 px-6 font-medium transition-colors ${
+                    activeTab === 'ratings'
+                        ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
             >
               플랫폼별 평점
             </button>
             <button
-              onClick={() => setActiveTab('stats')}
-              className={`flex-1 py-4 px-6 font-medium transition-colors ${
-                activeTab === 'stats'
-                  ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-              }`}
+                onClick={() => setActiveTab('stats')}
+                className={`flex-1 py-4 px-6 font-medium transition-colors ${
+                    activeTab === 'stats'
+                        ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
             >
               통계 분석
-            </button>
-            <button
-              onClick={() => setActiveTab('sentiment')}
-              className={`flex-1 py-4 px-6 font-medium transition-colors ${
-                activeTab === 'sentiment'
-                  ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-              }`}
-            >
-              감성 분석
             </button>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-1">
-            <OverallScore score={overallScore} sentimentScore={sentimentScore} />
+            <OverallScore score={overallScore} sentimentScore={sentimentScore}/>
           </div>
 
           <div className="lg:col-span-2">
             {activeTab === 'ratings' && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {ratings.map((rating, index) => (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {ratings.map((rating, index) => (
                   <RatingCard key={index} rating={rating} />
                 ))}
               </div>
