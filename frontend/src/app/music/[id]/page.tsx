@@ -19,7 +19,7 @@ import { YoutubeCommentScore, CommentWithSentiment, SentimentAnalysis, Sentiment
 export default function MusicAnalysisPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const [musicData, setMusicData] = useState<MusicAnalysis | null>(null);
-  const [activeTab, setActiveTab] = useState<'ratings' | 'stats' | 'sentiment'>('ratings');
+  const [activeTab, setActiveTab] = useState<'ratings' | 'stats' | 'daily-summary' | 'sentiment-summary' | 'comments'>('daily-summary');
   
   // 실제 API 데이터 상태
   const [comments, setComments] = useState<CommentWithSentiment[]>([]);
@@ -39,7 +39,7 @@ export default function MusicAnalysisPage({ params }: { params: Promise<{ id: st
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const data = mockMusicData[resolvedParams.id] || mockMusicData['1'];
+    const data = mockMusicData['3'];
     setMusicData(data);
   }, [resolvedParams.id]);
 
@@ -240,14 +240,34 @@ export default function MusicAnalysisPage({ params }: { params: Promise<{ id: st
         <div className="bg-white rounded-xl shadow-md mb-6">
           <div className="flex border-b">
             <button
-                onClick={() => setActiveTab('sentiment')}
+                onClick={() => setActiveTab('daily-summary')}
                 className={`flex-1 py-4 px-6 font-medium transition-colors ${
-                    activeTab === 'sentiment'
+                    activeTab === 'daily-summary'
                         ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
                         : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                 }`}
             >
-              감성 분석
+              일별여론요약
+            </button>
+            <button
+                onClick={() => setActiveTab('sentiment-summary')}
+                className={`flex-1 py-4 px-6 font-medium transition-colors ${
+                    activeTab === 'sentiment-summary'
+                        ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+            >
+              감성요약
+            </button>
+            <button
+                onClick={() => setActiveTab('comments')}
+                className={`flex-1 py-4 px-6 font-medium transition-colors ${
+                    activeTab === 'comments'
+                        ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+            >
+              댓글목록
             </button>
             <button
                 onClick={() => setActiveTab('ratings')}
@@ -308,7 +328,15 @@ export default function MusicAnalysisPage({ params }: { params: Promise<{ id: st
               </div>
             )}
 
-            {activeTab === 'sentiment' && (
+            {/* 일별여론요약 탭 */}
+            {activeTab === 'daily-summary' && (
+              <div className="space-y-6">
+                <DailySummaryCard summaries={dailySummaries} isLoading={summaryLoading} />
+              </div>
+            )}
+
+            {/* 감성요약 탭 (감성요약 + 감성분포 + 날짜별 감성 트렌드) */}
+            {activeTab === 'sentiment-summary' && (
               <div className="space-y-6">
                 {loading ? (
                   <div className="bg-white rounded-xl shadow-md p-12 text-center">
@@ -325,13 +353,10 @@ export default function MusicAnalysisPage({ params }: { params: Promise<{ id: st
                   </div>
                 ) : (
                   <>
-                    {/* Daily Summary 카드 (최상단) */}
-                    <DailySummaryCard summaries={dailySummaries} isLoading={summaryLoading} />
-
                     {/* 감성 요약 카드 */}
                     <div className="bg-white rounded-xl shadow-md p-6">
                       <h3 className="text-2xl font-bold text-gray-800 mb-6">감성 요약</h3>
-                      
+
                       {/* AI 댓글 분석 요약 */}
                       <div className="mb-6">
                         {aiLoading ? (
@@ -344,7 +369,7 @@ export default function MusicAnalysisPage({ params }: { params: Promise<{ id: st
                           <AISummaryCard summary={aiAnalysis.summary} />
                         ) : null}
                       </div>
-                      
+
                       <SentimentSummary
                         positive={aiAnalysis ? aiAnalysis.sentiment.positive : sentimentAnalysis.positive}
                         neutral={aiAnalysis ? aiAnalysis.sentiment.neutral : sentimentAnalysis.neutral}
@@ -362,11 +387,10 @@ export default function MusicAnalysisPage({ params }: { params: Promise<{ id: st
                           negative={aiAnalysis ? aiAnalysis.sentiment.negative : sentimentAnalysis.negative}
                         />
                       </div>
-                      
+
                       <div className="bg-white rounded-xl shadow-md p-6">
                         <h3 className="text-xl font-bold text-gray-800 mb-12 text-center">
                           날짜별 감성 트렌드
-                        
                         </h3>
                         {trendData.length > 0 ? (
                           <TrendChart data={trendData} />
@@ -377,20 +401,39 @@ export default function MusicAnalysisPage({ params }: { params: Promise<{ id: st
                         )}
                       </div>
                     </div>
-
-                    {/* 댓글 목록 */}
-                    <div className="bg-white rounded-xl shadow-md p-6">
-                      <h3 className="text-2xl font-bold text-gray-800 mb-6">댓글 목록</h3>
-                      <CommentList comments={aiAnalysis ? aiAnalysis.comments.map(c => ({
-                        ...c,
-                        videoId: 'temp',
-                        parentId: null,
-                        updatedAt: c.publishedAt,
-                        collectedAtLocal: c.publishedAt,
-                        relevance: null,
-                      })) : comments} />
-                    </div>
                   </>
+                )}
+              </div>
+            )}
+
+            {/* 댓글목록 탭 */}
+            {activeTab === 'comments' && (
+              <div className="space-y-6">
+                {loading ? (
+                  <div className="bg-white rounded-xl shadow-md p-12 text-center">
+                    <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+                    <p className="text-gray-600">댓글 데이터 로딩 중...</p>
+                  </div>
+                ) : error ? (
+                  <div className="bg-red-50 border border-red-200 rounded-xl p-8 text-center">
+                    <svg className="w-12 h-12 text-red-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p className="text-red-700 font-semibold mb-2">데이터 로드 실패</p>
+                    <p className="text-red-600 text-sm">{error}</p>
+                  </div>
+                ) : (
+                  <div className="bg-white rounded-xl shadow-md p-6">
+                    <h3 className="text-2xl font-bold text-gray-800 mb-6">댓글 목록</h3>
+                    <CommentList comments={aiAnalysis ? aiAnalysis.comments.map(c => ({
+                      ...c,
+                      videoId: 'temp',
+                      parentId: null,
+                      updatedAt: c.publishedAt,
+                      collectedAtLocal: c.publishedAt,
+                      relevance: null,
+                    })) : comments} />
+                  </div>
                 )}
               </div>
             )}

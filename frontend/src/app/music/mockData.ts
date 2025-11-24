@@ -146,5 +146,76 @@ All you gotta do is just meet me at the...`
     currentRank: 2,
     weeksOnChart: 6,
     sentimentScore: 89
+  },
+  '3': {
+    music: {
+      id: '3',
+      title: 'Richman',
+      artist: 'aespa',
+      album: 'Richman - The 5th Mini Album',
+      albumCover: 'https://cdnimg.melon.co.kr/cm2/album/images/120/98/784/12098784_20250904164935_500.jpg',
+      releaseDate: '2024.10.21',
+      genre: 'Dance',
+      duration: '3:05'
+    },
+    overallScore: 88,
+    ratings: [
+      {
+        platform: 'YouTube',
+        score: 9.0,
+        maxScore: 10,
+        icon: '📺',
+        color: 'red',
+        description: '조회수 2억뷰, 좋아요 800만',
+        trend: 'up',
+        trendValue: 10
+      },
+      {
+        platform: 'Twitter',
+        score: 8.5,
+        maxScore: 10,
+        icon: '🐦',
+        color: 'blue',
+        description: '실시간 트렌드 TOP 3, 멘션 150만+',
+        trend: 'stable',
+        trendValue: 0
+      },
+      {
+        platform: 'TikTok',
+        score: 9.2,
+        maxScore: 10,
+        icon: '🎵',
+        color: 'black',
+        description: '챌린지 참여 300만, 사운드 사용 500만+',
+        trend: 'up',
+        trendValue: 20
+      },
+      {
+        platform: 'Spotify',
+        score: 8.7,
+        maxScore: 10,
+        icon: '🎧',
+        color: 'green',
+        description: '글로벌 차트 TOP 10, 일일 스트리밍 1500만+',
+        trend: 'down',
+        trendValue: -3
+      },
+      {
+        platform: 'Instagram',
+        score: 8.8,
+        maxScore: 10,
+        icon: '📷',
+        color: 'purple',
+        description: '릴스 조회수 5억+, 해시태그 게시물 300만+',
+        trend: 'up',
+        trendValue: 7
+      }
+    ],
+    weeklyPlays: 34567890,
+    totalPlays: 567890123,
+    peakRank: 1,
+    currentRank: 2,
+    weeksOnChart: 6,
+    sentimentScore: 89
   }
 };
